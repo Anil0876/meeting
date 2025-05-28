@@ -1,0 +1,74 @@
+<div id="koption-scheduler">
+  <h2>Schedule Your Meeting</h2>
+  <form id="schedulerForm">
+    <label for="meetingTitle">Meeting Title *</label>
+    <select id="meetingTitle" required>
+      <option value="">Select meeting type</option>
+      <option value="Interview">Interview</option>
+      <option value="Training">Training</option>
+      <option value="Discussion">Discussion</option>
+    </select>
+
+    <label for="dateTime">Date and Time *</label>
+    <input type="datetime-local" id="dateTime" required />
+
+    <label for="name">Your Name *</label>
+    <input type="text" id="name" required placeholder="Enter your name" />
+
+    <label for="employeeId">Employee ID (Optional)</label>
+    <input type="text" id="employeeId" placeholder="Enter employee ID" />
+
+    <label for="email">Your Email *</label>
+    <input type="email" id="email" required placeholder="Enter your email" />
+
+    <button type="submit">Schedule Meeting</button>
+    <p id="formMessage"></p>
+  </form>
+</div>
+
+<script>
+  const API_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzH5W7nXKaGQMFONnb1aizEEYV8MAUMIasT6Y6ORkg0oXjAYwjTwi2Nytn55tnw42lT/exec'; // Replace with your real /exec URL
+
+  const form = document.getElementById('schedulerForm');
+  const msg = document.getElementById('formMessage');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    msg.textContent = 'Recording your meeting...';
+    msg.style.color = '#003377';
+
+    const payload = {
+      meetingTitle: form.meetingTitle.value,
+      dateTime: form.dateTime.value,
+      name: form.name.value.trim(),
+      employeeId: form.employeeId.value.trim(),
+      email: form.email.value.trim()
+    };
+
+    try {
+      const response = await fetch(API_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.error) {
+        msg.textContent = data.error;
+        msg.style.color = '#e63946';
+      } else {
+        msg.textContent = data.message;
+        msg.style.color = '#2a9d8f';
+        form.reset();
+      }
+    } catch (error) {
+      msg.textContent = 'Could not reach the server. Please check your internet connection or try again in a few minutes.';
+      msg.style.color = '#e63946';
+      console.error('Error:', error);
+    }
+  });
+</script>
